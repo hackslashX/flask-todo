@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    volumes:
+      - backend-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - docker.env
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_SERVER=${DATABASE_HOST}
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/main:/todo
+    env_file:
+      - docker.env
+    working_dir: /todo
+    command: /todo/run.sh
+  
+
+volumes:
+  backend-db-data:
