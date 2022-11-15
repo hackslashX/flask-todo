@@ -160,7 +160,6 @@ def request_inject(
                 # Encrypt response
                 if encrypt_response:
                     data = json.dumps(base_response["data"]).encode("utf-8")
-                    print(data)
                     base_response["data"] = encrypt_data_aes(data=data, key=key)
 
                 return Response(
