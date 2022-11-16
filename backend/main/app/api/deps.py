@@ -81,16 +81,6 @@ def request_inject(
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             db_object = next(get_db())
 
-            # If encrypt_response is True, get salt from JWT token and construct key
-            if encrypt_response:
-                salt = get_jwt()["salt"]
-                key = generate_determinstic_aes_key(
-                    password=db_object.query(User)
-                    .get(get_jwt_identity())
-                    .hashed_password,
-                    salt=salt,
-                )
-
             if input_schema is not None:
                 try:
                     json_data = request.get_json(force=True)
@@ -159,6 +149,13 @@ def request_inject(
 
                 # Encrypt response
                 if encrypt_response:
+                    salt = get_jwt()["salt"]
+                    key = generate_determinstic_aes_key(
+                        password=db_object.query(User)
+                        .get(get_jwt_identity())
+                        .hashed_password,
+                        salt=salt,
+                    )
                     data = json.dumps(base_response["data"]).encode("utf-8")
                     base_response["data"] = encrypt_data_aes(data=data, key=key)
 
